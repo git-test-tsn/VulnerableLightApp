@@ -1,46 +1,38 @@
-name: "CodeQL"
+name: CodeQL
 
 on:
   push:
-    branches: [main]
-    paths:
-    - '**.cs'
-    - '**.csproj'
+    branches: [ main ]
   pull_request:
-    branches: [main]
-    paths:
-    - '**.cs'
-    - '**.csproj'
+    # The branches below must be a subset of the branches above
+    branches: [ main ]
   schedule:
-    - cron: '0 8 * * 4'
+    - cron: '0 2 * * 1' # Exécute l'analyse tous les lundis à 2h du matin
 
 jobs:
   analyze:
-
-    name: analyze
+    name: Analyze
     runs-on: ubuntu-latest
 
     strategy:
-      fail-fast: false
       matrix:
-        language: ['csharp']
+        language: [ 'csharp' ] # Ajoutez ici d'autres langages si nécessaire (ex: [ 'csharp', 'javascript' ])
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 2
+      uses: actions/checkout@v4
 
-    - run: git checkout HEAD^2
-      if: ${{ github.event_name == 'pull_request' }}
-
+    # Initialise le CodeQL
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
+      uses: github/codeql-action/init@v2
       with:
         languages: ${{ matrix.language }}
 
+    # Exécute les builds et analyses
     - name: Autobuild
-      uses: github/codeql-action/autobuild@v1
+      uses: github/codeql-action/autobuild@v2
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: '/language:{{ matrix.language }}'
